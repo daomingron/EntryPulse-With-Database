@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maya - Mock Payment</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .maya-container {
+      background: white;
+      border-radius: 20px;
+      max-width: 420px;
+      width: 100%;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+    .maya-header {
+      background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+      padding: 1.5rem;
+      text-align: center;
+      color: white;
+    }
+    .maya-logo {
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: 2px;
+    }
+    .maya-subtitle {
+      font-size: 0.85rem;
+      opacity: 0.9;
+      margin-top: 0.5rem;
+    }
+    .maya-body {
+      padding: 1.5rem;
+    }
+    .amount-display {
+      background: #ECFDF5;
+      border: 2px solid #10B981;
+      border-radius: 12px;
+      padding: 1.25rem;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    .amount-label {
+      font-size: 0.75rem;
+      color: #64748B;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 0.5rem;
+    }
+    .amount-value {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: #059669;
+      font-family: 'Courier New', monospace;
+    }
+    .merchant-info {
+      background: #F8FAFC;
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .merchant-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      font-size: 0.85rem;
+    }
+    .merchant-label { color: #64748B; }
+    .merchant-value { font-weight: 600; color: #1E293B; }
+    .pin-section {
+      margin-bottom: 1.5rem;
+    }
+    .pin-label {
+      font-size: 0.85rem;
+      color: #1E293B;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+    .pin-input {
+      width: 100%;
+      padding: 1rem;
+      border: 2px solid #E2E8F0;
+      border-radius: 10px;
+      font-size: 1.5rem;
+      text-align: center;
+      letter-spacing: 8px;
+      font-family: monospace;
+      transition: border-color 0.2s;
+    }
+    .pin-input:focus {
+      outline: none;
+      border-color: #10B981;
+    }
+    .btn-pay {
+      width: 100%;
+      background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+      color: white;
+      border: none;
+      padding: 1rem;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      margin-bottom: 1rem;
+    }
+    .btn-pay:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+    }
+    .btn-pay:disabled {
+      background: #94A3B8;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .btn-open-app {
+      width: 100%;
+      background: linear-gradient(135deg, #0066B3 0%, #00A0E9 100%);
+      color: white;
+      border: none;
+      padding: 1rem;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn-open-app:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 102, 179, 0.3);
+    }
+    .security-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      font-size: 0.75rem;
+      color: #64748B;
+    }
+    .demo-badge {
+      background: #FEF3C7;
+      color: #92400E;
+      padding: 0.5rem;
+      text-align: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .redirect-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    .redirect-modal.active {
+      display: flex;
+    }
+    .redirect-modal-card {
+      background: white;
+      border-radius: 16px;
+      padding: 2rem;
+      max-width: 340px;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+    .redirect-icon {
+      font-size: 3rem;
+      color: #10B981;
+      margin-bottom: 1rem;
+    }
+    .redirect-text {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #1E293B;
+      margin-bottom: 0.5rem;
+    }
+    .redirect-sub {
+      font-size: 0.85rem;
+      color: #64748B;
+      margin-bottom: 1.5rem;
+    }
+    .countdown {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #10B981;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="maya-container">
+    <div class="maya-header">
+      <div class="maya-logo">Maya</div>
+      <div class="maya-subtitle">All-in-One Payment</div>
+    </div>
+
+    <div class="demo-badge">
+      <i class="fa-solid fa-flask"></i> MOCK / PRESENTATION MODE
+    </div>
+
+    <div class="maya-body">
+      <div class="amount-display">
+        <div class="amount-label">Amount to Pay</div>
+        <div class="amount-value" id="paymentAmount">₱50,000.00</div>
+      </div>
+
+      <div class="merchant-info">
+        <div class="merchant-row">
+          <span class="merchant-label">Merchant</span>
+          <span class="merchant-value">EntryPulse SeatLock 360</span>
+        </div>
+        <div class="merchant-row">
+          <span class="merchant-label">Reference</span>
+          <span class="merchant-value" id="refNumber">TX-PRESENTATION-001</span>
+        </div>
+        <div class="merchant-row">
+          <span class="merchant-label">Date</span>
+          <span class="merchant-value" id="paymentDate">Sep 17, 2026</span>
+        </div>
+      </div>
+
+      <div class="pin-section">
+        <div class="pin-label"><i class="fa-solid fa-lock"></i> Enter your Password</div>
+        <input type="password" class="pin-input" id="passwordInput" placeholder="Enter password" maxlength="50" style="letter-spacing: normal; font-size: 1rem;" />
+      </div>
+
+      <button class="btn-pay" id="btnConfirmPay" onclick="processPayment()" disabled>
+        <i class="fa-solid fa-check-circle"></i> Confirm Payment
+      </button>
+
+      <button class="btn-open-app" id="btnOpenApp" onclick="showRedirectModal()">
+        <i class="fa-solid fa-wallet"></i> Open Maya App
+      </button>
+
+      <div class="security-badge">
+        <i class="fa-solid fa-shield-halved" style="color: #10B981;"></i>
+        <span>Secured by Maya • 256-bit encryption</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Redirect Modal -->
+  <div class="redirect-modal" id="redirectModal">
+    <div class="redirect-modal-card">
+      <div class="redirect-icon">
+        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+      </div>
+      <div class="redirect-text">Redirecting to Maya</div>
+      <div class="redirect-sub">Opening Maya payment gateway...</div>
+      <div class="countdown" id="countdown">5</div>
+    </div>
+  </div>
+
+  <script>
+    // Get amount from URL params or use default
+    const urlParams = new URLSearchParams(window.location.search);
+    const amount = urlParams.get('amount') || '50000';
+    const ref = urlParams.get('ref') || 'TX-' + Date.now().toString(36).toUpperCase();
+
+    document.getElementById('paymentAmount').textContent = '₱' + parseFloat(amount).toLocaleString() + '.00';
+    document.getElementById('refNumber').textContent = ref;
+    document.getElementById('paymentDate').textContent = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+    let appOpened = false; // Track if app was opened
+
+    // Password input validation
+    document.getElementById('passwordInput').addEventListener('input', function(e) {
+      updatePayButtonState();
+    });
+
+    function updatePayButtonState() {
+      const password = document.getElementById('passwordInput').value;
+      const btnConfirmPay = document.getElementById('btnConfirmPay');
+      // Button enabled when password is entered
+      btnConfirmPay.disabled = !(password.length > 0);
+    }
+
+    function showRedirectModal() {
+      const modal = document.getElementById('redirectModal');
+      modal.classList.add('active');
+
+      let count = 5;
+      const countdownEl = document.getElementById('countdown');
+      countdownEl.textContent = count;
+
+      const interval = setInterval(() => {
+        count--;
+        countdownEl.textContent = count;
+
+        if (count <= 0) {
+          clearInterval(interval);
+          modal.classList.remove('active');
+          // Mark app as opened
+          appOpened = true;
+          updatePayButtonState();
+        }
+      }, 1000);
+    }
+
+    function processPayment() {
+      const btn = document.getElementById('btnConfirmPay');
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+      btn.disabled = true;
+
+      setTimeout(() => {
+        alert('✅ Payment Successful!\n\nAmount: ₱' + parseFloat(amount).toLocaleString() + '.00\nRef: ' + ref + '\n\n[MOCK] Payment has been processed for presentation purposes.');
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> Payment Confirmed';
+        btn.style.background = '#059669';
+
+        // Send success message to parent window
+        if (window.opener) {
+          window.opener.postMessage({
+            type: 'PAYMENT_SUCCESS',
+            method: 'Maya',
+            amount: amount,
+            ref: ref
+          }, '*');
+        }
+
+        setTimeout(() => {
+          window.close();
+        }, 1500);
+      }, 2000);
+    }
+
+    // Set initial button state
+    updatePayButtonState();
+  </script>
+</body>
+</html>
